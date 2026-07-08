@@ -24,15 +24,30 @@ export default function Viewer() {
     };
     
     window.addEventListener('afterprint', handleAfterPrint);
-    return () => window.removeEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
   }, [token]);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
 
   const fetchFile = async () => {
     try {
       const response = await axios.get(`${API_BASE}/view/${token}`, {
-        responseType: 'blob'
+        responseType: 'arraybuffer',
+        headers: {
+          Accept: 'application/pdf'
+        }
       });
-      const url = URL.createObjectURL(response.data);
+
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
     } catch (err) {
       setError("This link is expired or has already been used for printing.");
@@ -42,7 +57,18 @@ export default function Viewer() {
   };
 
   const handlePrint = () => {
-    window.print();
+    const iframe = document.getElementById('pdf-frame');
+    if (iframe) {
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (e) {
+        // Fallback for browsers that block iframe.print()
+        window.print();
+      }
+    } else {
+      window.print();
+    }
   };
 
   const confirmPrintAndCleanup = async () => {
@@ -88,21 +114,30 @@ export default function Viewer() {
         </button>
       </div>
       
-      {/* Hidden PDF for printing - some browsers need this for window.print to work on the object */}
       <iframe 
         id="pdf-frame"
-        src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
+        src={pdfUrl}
         title="Secure PDF Viewer"
       />
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
+          body * { visibility: hidden; }
+          #pdf-frame, #pdf-frame * { visibility: visible; }
+          #pdf-frame {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
+            padding: 0;
+            border: none;
+          }
           .viewer-toolbar { display: none !important; }
-          body { background: white !important; }
-          .viewer-container { height: auto !important; }
-          iframe { height: 100vh !important; width: 100vw !important; }
         }
       `}} />
     </div>
   );
 }
+

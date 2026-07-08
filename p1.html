@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Shopping Cart</h2>
+
+<input type="text" id="name" placeholder="Product Name">
+<input type="text" id="price" placeholder="Price">
+
+<button onclick="add()">Add</button>
+<button onclick="total()">Total</button>
+
+<p id="result"></p>
+
+<script>
+let prices = [];
+
+function add() {
+    let p = Number(document.getElementById("price").value);
+
+    prices.push(p);
+
+    result.innerHTML = "Product Added";
+}
+
+function total() {
+    let sum = 0;
+
+    for(let x of prices) {
+        sum += x;
+    }
+
+    result.innerHTML = "Total = " + sum;
+}
+</script>
+
+</body>
+</html>

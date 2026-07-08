@@ -1,0 +1,75 @@
+ <!DOCTYPE html>
+<html>
+<body>
+
+<h2>Seat Booking</h2>
+
+<div id="seats"></div>
+
+<input type="number" id="cancel" placeholder="Seat No">
+<button onclick="cancelSeat()">Cancel</button>
+
+<p id="result"></p>
+
+<script>
+let selected = [];
+
+for(let i=1;i<=10;i++){
+
+    let b = document.createElement("button");
+
+    b.innerHTML = i;
+
+    b.onclick = function(){
+
+        if(b.style.background=="red"){
+            alert("Booked");
+            return;
+        }
+
+        b.style.background = "orange";
+
+        selected.push(b);
+
+        result.innerHTML =
+        "Selected Seat : " + i;
+    };
+
+    seats.appendChild(b);
+}
+
+function pay(){
+
+    selected.forEach(x=>{
+        x.style.background = "red";
+    });
+
+    result.innerHTML = "Payment Successful";
+}
+
+function cancelSeat(){
+
+    let n = cancel.value;
+
+    let btns = document.querySelectorAll("button");
+
+    btns.forEach(b=>{
+
+        if(b.innerHTML == n &&
+           b.style.background=="red"){
+
+            b.style.background = "";
+
+            result.innerHTML =
+            "Seat Cancelled";
+        }
+    });
+}
+</script>
+
+<br><br>
+
+<button onclick="pay()">Pay Now</button>
+
+</body>
+</html>
