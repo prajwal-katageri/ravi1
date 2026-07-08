@@ -71,8 +71,14 @@ public class FileService {
 
         GridFsResource resource = gridFsTemplate.getResource(gridFSFile);
         byte[] encryptedData = resource.getInputStream().readAllBytes();
-        
-        return encryptionService.decrypt(encryptedData);
+
+        byte[] decryptedData = encryptionService.decrypt(encryptedData);
+
+        // Enforce one-time access at the backend layer: after first successful open,
+        // remove both file content and token metadata so the link cannot be reused.
+        cleanup(token);
+
+        return decryptedData;
     }
 
     public void cleanup(String token) {
